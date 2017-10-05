@@ -15,6 +15,7 @@ let package = Package(
         .target(
             name: "SlackSourcing",
             dependencies: ["SlackSourcingCore"]),
-        .target(name: "SlackSourcingCore")
+        .target(name: "SlackSourcingCore"),
+        .testTarget(name: "SlackSourcingTests")
     ]
 )

@@ -1,3 +1,5 @@
+import Foundation
+
 public final class SlackSourcingCommandLineTool {
     private let arguments: [String]
 
@@ -8,6 +10,6 @@ public final class SlackSourcingCommandLineTool {
     }
 
     public func run() throws {
-        print("Hello from the core")
+        ProductionSlackClient().postMessage("hello world", to: "#general")
     }
 }

@@ -2,6 +2,7 @@ import Foundation
 
 public enum SlackEventTypeIdentifier: String, Codable {
     case hello
+    case message
 }
 
 public enum SlackParserError: Error {
@@ -16,6 +17,22 @@ public struct UntypedSlackEvent: BasicSlackEvent {
     public var type: SlackEventTypeIdentifier
 }
 
+public struct SlackMessageEvent: BasicSlackEvent {
+    public var type: SlackEventTypeIdentifier
+    public var channel: String
+    public var user: String
+    public var text: String
+    public var timestamp: String
+
+    enum CodingKeys: CodingKey, String {
+        case type
+        case channel
+        case user
+        case text
+        case timestamp = "ts"
+    }
+}
+
 public class SlackEvent {
     public static func parse(json: String) throws -> BasicSlackEvent? {
         guard let data = json.data(using: .utf8) else {
@@ -26,7 +43,11 @@ public class SlackEvent {
 
         do {
             let untypedEvent = try decoder.decode(UntypedSlackEvent.self, from: data)
-            return untypedEvent
+            
+            switch untypedEvent.type {
+            case .hello: return untypedEvent
+            case .message: return try decoder.decode(SlackMessageEvent.self, from: data)
+            }
         } catch {
             return nil
         }

@@ -20,4 +20,23 @@ public class SlackEventTests: XCTestCase {
 
         XCTAssertNil(message)
     }
+
+    func testParsingChannelMessage() throws {
+        let raw = """
+            {
+                "type": "message",
+                "channel": "C2147483705",
+                "user": "U2147483697",
+                "text": "Hello world",
+                "ts": "1355517523.000005"
+            }
+        """
+        let message = try SlackEvent.parse(json: raw) as! SlackMessageEvent
+
+        XCTAssertEqual(message.type, .message)
+        XCTAssertEqual(message.channel, "C2147483705")
+        XCTAssertEqual(message.user, "U2147483697")
+        XCTAssertEqual(message.text, "Hello world")
+        XCTAssertEqual(message.timestamp, "1355517523.000005")
+    }
 }

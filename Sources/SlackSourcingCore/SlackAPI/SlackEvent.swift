@@ -17,7 +17,7 @@ public struct UntypedSlackEvent: BasicSlackEvent {
     public var type: SlackEventTypeIdentifier
 }
 
-public struct SlackMessageEvent: BasicSlackEvent {
+public struct SlackMessageEvent: BasicSlackEvent, Equatable {
     public var type: SlackEventTypeIdentifier
     public var channel: String
     public var user: String
@@ -30,6 +30,16 @@ public struct SlackMessageEvent: BasicSlackEvent {
         case user
         case text
         case timestamp = "ts"
+    }
+
+    public static func ==(lhs: SlackMessageEvent, rhs: SlackMessageEvent) -> Bool {
+        return (
+            lhs.type == rhs.type &&
+            lhs.channel == rhs.channel &&
+            lhs.user == rhs.user &&
+            lhs.text == rhs.text &&
+            lhs.timestamp == rhs.timestamp
+        )
     }
 }
 

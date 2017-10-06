@@ -6,8 +6,6 @@ public final class SlackSourcingCommandLineTool {
     private var socket: WebSocket!
     private var listener: SlackListener!
 
-    public var hasHelloWorld: Bool { return arguments.contains("hello world") }
-
     public init(arguments: [String] = CommandLine.arguments) {
         self.arguments = arguments
     }

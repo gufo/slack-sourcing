@@ -7,6 +7,8 @@ public protocol SlackClient {
 }
 
 public class ProductionSlackClient: SlackClient {
+    public static var shared: ProductionSlackClient = ProductionSlackClient()
+
     public func rtmConnect(_ completionHandler: @escaping (SlackRTMConnectResponse) -> Void) {
         let request = Alamofire.request(
             "https://slack.com/api/rtm.connect?token=\(SlackCredentials.botAccessToken)"

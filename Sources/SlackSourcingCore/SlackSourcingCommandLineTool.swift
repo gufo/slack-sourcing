@@ -13,6 +13,9 @@ public final class SlackSourcingCommandLineTool {
     public func run() throws {
         ProductionSlackClient().rtmConnect() { response in
             if response.ok {
+                StandardSlackBot.shared.userId = response.myself.id
+                StandardSlackBot.shared.userName = response.myself.name
+
                 self.listener = SlackListener()
                 self.socket = WebSocket(url: response.url)
                 self.socket.delegate = self.listener

@@ -32,6 +32,18 @@ public struct SlackMessageEvent: BasicSlackEvent, Equatable {
         case timestamp = "ts"
     }
 
+    public init(type: SlackEventTypeIdentifier, channel: String, user: String, text: String, timestamp: String) {
+        self.type = type
+        self.channel = channel
+        self.user = user
+        self.text = text
+        self.timestamp = timestamp
+    }
+
+    public func mentions(_ userId: String) -> Bool {
+        return text.contains("<@\(userId)>")
+    }
+
     public static func ==(lhs: SlackMessageEvent, rhs: SlackMessageEvent) -> Bool {
         return (
             lhs.type == rhs.type &&

@@ -4,6 +4,8 @@ import XCTest
 
 public class SlackEventDispatcherTests: XCTestCase {
     class DummySlackBot: SlackBot {
+        var userId: String = "BOT_ID"
+        var userName: String = "Sourcing"
         var seenMessages: [SlackMessageEvent] = []
 
         func see(message: SlackMessageEvent) {

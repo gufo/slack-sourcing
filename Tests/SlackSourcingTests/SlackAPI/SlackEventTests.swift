@@ -2,12 +2,12 @@ import Foundation
 import SlackSourcingCore
 import XCTest
 
-public class SlackMessageTests: XCTestCase {
+public class SlackEventTests: XCTestCase {
     func testHelloMessageReturnsGenericType() throws {
         let raw = """
             {"type": "hello"}
         """
-        let message = try SlackMessage.parse(json: raw)!
+        let message = try SlackEvent.parse(json: raw)!
 
         XCTAssertEqual(message.type, .hello)
     }
@@ -16,7 +16,7 @@ public class SlackMessageTests: XCTestCase {
         let raw = """
             {"type": "bogusMessageType"}
         """
-        let message = try SlackMessage.parse(json: raw)
+        let message = try SlackEvent.parse(json: raw)
 
         XCTAssertNil(message)
     }

@@ -34,9 +34,9 @@ public class OAuthClient {
 
     private var callback: OAuthCallback!
     
-    public init(url: URL) {
+    public init(url: URL, session: URLSession) {
         self.baseURL = url
-        self.session = URLSession(configuration: .ephemeral)
+        self.session = session
     }
 
     public func authenticate(username: String, password: String, _ callback: @escaping OAuthCallback) {

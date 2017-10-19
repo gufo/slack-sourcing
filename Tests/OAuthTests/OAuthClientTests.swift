@@ -6,7 +6,7 @@ public class OAuthClientTests: XCTestCase {
     private let testEnvironment = URL(string: "https://stage-sourcing.valtech.se/")!
 
     func testInvalidLoginResultsInError() {
-        let client = OAuthClient(url: testEnvironment)
+        let client = OAuthClient(url: testEnvironment, session: URLSession(configuration: .ephemeral))
         let expectation = XCTestExpectation(description: "Authentication performs a callback")
 
         client.authenticate(username: "invalid.username", password: "whatever") { error in
@@ -17,7 +17,7 @@ public class OAuthClientTests: XCTestCase {
     }
 
     func testValidLoginResultsInTokenReturned() {
-        let client = OAuthClient(url: testEnvironment)
+        let client = OAuthClient(url: testEnvironment, session: URLSession(configuration: .ephemeral))
         let expectation = XCTestExpectation(description: "Authentication performs a callback")
 
         client.authenticate(username: TestCredentials.username, password: TestCredentials.password) { error in

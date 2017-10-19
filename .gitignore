@@ -3,3 +3,5 @@
 /Packages
 /*.xcodeproj
 SlackCredentials.swift
+SourcingCredentials.swift
+TestCredentials.swift

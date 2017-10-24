@@ -35,6 +35,33 @@ public class SlackBotTests: XCTestCase {
             ["A_CHANNEL <@A_USER> You talkin' to me? 'Cause I don't see nobody else here."]
         )
     }
+
+    func testAskingForTotalNumberOfActiveCases() {
+        class DummySourcingClient: SourcingClient {
+            func numberOfOpenCases(completion: @escaping (Int?, Error?) -> Void) {
+                completion(101, nil)
+            }
+        }
+
+        let slackClient: DummySlackClient = DummySlackClient()
+        let sourcingClient: DummySourcingClient = DummySourcingClient()
+
+        let bot = StandardSlackBot(slackClient: slackClient, sourcingClient: sourcingClient)
+        bot.userId = "bot"
+        
+        bot.see(message: SlackMessageEvent(
+            type: .message,
+            channel: "CHANNEL",
+            user: "curious",
+            text: "<@bot> äre möcke nu?",
+            timestamp: ""
+        ))
+
+        XCTAssertEqual(
+            slackClient.postedMessages,
+            ["CHANNEL <@curious> Vi har just nu 101 öppna ärenden."]
+        )
+    }
 }
 
 class DummySlackClient: SlackClient {

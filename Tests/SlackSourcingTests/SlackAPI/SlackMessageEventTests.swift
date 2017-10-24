@@ -14,4 +14,16 @@ public class SlackMessageEventTests: XCTestCase {
         XCTAssertTrue(message.mentions("MENTION"))
         XCTAssertFalse(message.mentions("NON_MENTION"))
     }
+
+    func testInfersTotalCountCommands() {
+        let message = SlackMessageEvent(
+            type: .message,
+            channel: "channel",
+            user: "sender",
+            text: "Är det möcke nu?",
+            timestamp: ""
+        )
+
+        XCTAssertEqual(message.inferredCommand(), .getTotalCount)
+    }
 }

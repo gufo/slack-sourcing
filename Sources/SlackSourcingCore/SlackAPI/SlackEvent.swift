@@ -9,6 +9,11 @@ public enum SlackParserError: Error {
     case unparseableData
 }
 
+public enum SlackCommand {
+    case getTotalCount
+    case unknown
+}
+
 public protocol BasicSlackEvent: Decodable {
     var type: SlackEventTypeIdentifier { get }
 }
@@ -42,6 +47,13 @@ public struct SlackMessageEvent: BasicSlackEvent, Equatable {
 
     public func mentions(_ userId: String) -> Bool {
         return text.contains("<@\(userId)>")
+    }
+
+    public func inferredCommand() -> SlackCommand {
+        if text.contains("möcke nu") {
+            return .getTotalCount
+        }
+        return .unknown
     }
 
     public static func ==(lhs: SlackMessageEvent, rhs: SlackMessageEvent) -> Bool {

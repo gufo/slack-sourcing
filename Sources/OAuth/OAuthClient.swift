@@ -41,14 +41,14 @@ public class OAuthClient {
 
     public func authenticate(username: String, password: String, _ callback: @escaping OAuthCallback) {
         self.callback = callback
-        startSignInFlow() { formData, csrfToken in
-            self.postUserCredentials(formData, username: username, password: password, csrfToken: csrfToken) {
+        startSignInFlow() { formData in
+            self.postUserCredentials(formData, username: username, password: password) {
                 self.callback(nil) // No error. Proceed.
             }
         }
     }
 
-    private func startSignInFlow(next: @escaping (LoginFormData, String?) -> Void) {
+    private func startSignInFlow(next: @escaping (LoginFormData) -> Void) {
         let signInUrl = baseURL.appendingPathComponent("api/idp/signIn")
         let task = session.dataTask(with: signInUrl) { data, response, error in
             guard error == nil else { return self.error(error!) }
@@ -56,14 +56,11 @@ public class OAuthClient {
                 let response = response as? HTTPURLResponse,
                 let url = response.url else { return self.error(OAuthErrors.invalidResponse) }
 
-            let cookies = HTTPCookie.cookies(withResponseHeaderFields: response.allHeaderFields as! [String : String], for: url)
-            let csrfCookie = cookies.first { cookie in cookie.name == "_csrf" }
-
             let html = String(data: data, encoding: .utf8)!
 
             do {
                 let formData = try LoginFormData(html: html, baseURL: url)
-                DispatchQueue.main.async { next(formData, csrfCookie?.value) }
+                DispatchQueue.main.async { next(formData) }
             } catch {
                 self.error(error)
             }
@@ -72,7 +69,7 @@ public class OAuthClient {
         task.resume()
     }
 
-    private func postUserCredentials(_ formData: LoginFormData, username: String, password: String, csrfToken: String?, next: @escaping () -> Void) {
+    private func postUserCredentials(_ formData: LoginFormData, username: String, password: String, next: @escaping () -> Void) {
         let parameters = formData.parameters + [
             ("email", username),
             ("password", password)

@@ -25,6 +25,7 @@ public class StandardSlackBot: SlackBot {
         if message.mentions(self.userId) {
             switch (message.inferredCommand()) {
             case .getTotalCount: reportNumberOfOpenCases(message: message)
+            case .whoami: reportMyEmailAddress(message: message)
             case .unknown:
                 slackClient.postMessage("<@\(message.user)> You talkin' to me? 'Cause I don't see nobody else here.", to: message.channel)
             }
@@ -38,6 +39,16 @@ public class StandardSlackBot: SlackBot {
             }
 
             self.slackClient.postMessage("<@\(message.user)> Vi har just nu \(count) öppna ärenden.", to: message.channel)
+        }
+    }
+
+    public func reportMyEmailAddress(message: SlackMessageEvent) {
+        slackClient.getUser(message.user) { user, error in
+            guard let user = user else {
+                return self.reportError(error, message: message)
+            }
+
+            self.slackClient.postMessage("<@\(message.user)> Du är: \(user.email)", to: message.channel)
         }
     }
 

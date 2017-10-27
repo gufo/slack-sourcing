@@ -29,8 +29,17 @@ struct LoginFormData {
 }
 
 public class OAuthClient {
+    public static var shared: OAuthClient!
+
+    public enum RequestMethod: String {
+        case get = "GET"
+        case post = "POST"
+        case put = "PUT"
+    }
+
     let baseURL: URL
     let session: URLSession
+    var token: String = ""
 
     private var callback: OAuthCallback!
     
@@ -46,6 +55,13 @@ public class OAuthClient {
                 self.callback(nil) // No error. Proceed.
             }
         }
+    }
+
+    public func urlRequest(url: URL, method: RequestMethod) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.httpMethod = method.rawValue
+        request.addValue("Bearer \(self.token)", forHTTPHeaderField: "Authorization")
+        return request
     }
 
     private func startSignInFlow(next: @escaping (LoginFormData) -> Void) {
@@ -89,6 +105,7 @@ public class OAuthClient {
                 return self.error(OAuthErrors.invalidUsernameOrPassword)
             }
 
+            self.token = currentURL.pathComponents.last!
             next()
         }
         task.resume()

@@ -18,9 +18,6 @@ public final class SlackSourcingCommandLineTool {
     public func run() throws {
         ProductionSlackClient().rtmConnect() { response in
             if response.ok {
-                StandardSlackBot.shared.userId = response.myself.id
-                StandardSlackBot.shared.userName = response.myself.name
-
                 self.urlSession = URLSession(configuration: .ephemeral)
                 self.oauthClient = OAuthClient(url: self.productionUrl, session: self.urlSession)
                 self.oauthClient.authenticate(username: SourcingCredentials.username, password: SourcingCredentials.password) { error in
@@ -29,7 +26,15 @@ public final class SlackSourcingCommandLineTool {
                         exit(-1)
                     }
                 }
-                ProductionSourcingClient.shared.urlSession = self.urlSession
+                OAuthClient.shared = self.oauthClient
+                ProductionSourcingClient.shared = ProductionSourcingClient(
+                    url: ProductionSourcingClient.stagingURL,
+                    oauthClient: OAuthClient.shared,
+                    urlSession: self.urlSession
+                )
+
+                StandardSlackBot.shared.userId = response.myself.id
+                StandardSlackBot.shared.userName = response.myself.name
 
                 self.listener = SlackListener()
                 self.socket = WebSocket(url: response.url)

@@ -1,4 +1,5 @@
 import Foundation
+import OAuth
 
 public typealias SourcingCallback<T> = (T?, Error?) -> Void
 
@@ -7,16 +8,19 @@ public protocol SourcingClient {
 }
 
 public class ProductionSourcingClient: SourcingClient {
-    public static let shared = ProductionSourcingClient(url: ProductionSourcingClient.stagingURL)
+    public static var shared: ProductionSourcingClient!
 
     public static let productionURL = URL(string: "https://sourcing.valtech.se/")!
     public static let stagingURL = URL(string: "https://stage-sourcing.valtech.se/")!
 
-    var urlSession: URLSession!
-    var baseURL: URL
+    let urlSession: URLSession
+    let oauthClient: OAuthClient
+    let baseURL: URL
 
-    public init(url: URL) {
-        baseURL = url
+    public init(url: URL, oauthClient: OAuthClient, urlSession: URLSession) {
+        self.baseURL = url
+        self.oauthClient = oauthClient
+        self.urlSession = urlSession
     }
 
     public func numberOfOpenCases(completion: @escaping SourcingCallback<Int>) {
@@ -26,8 +30,8 @@ public class ProductionSourcingClient: SourcingClient {
     }
 
     func getAllCases(completion: @escaping SourcingCallback<[SourcingCase]>) {
-        let url = baseURL.appendingPathComponent("api/case")
-        let task = urlSession.dataTask(with: url) { data, response, error in
+        let request = oauthClient.urlRequest(url: baseURL.appendingPathComponent("api/case"), method: .get)
+        let task = urlSession.dataTask(with: request) { data, response, error in
             guard let data = data else {
                 return completion(nil, error)
             }

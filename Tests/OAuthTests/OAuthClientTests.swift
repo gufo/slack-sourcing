@@ -22,7 +22,7 @@ public class OAuthClientTests: XCTestCase {
 
         client.authenticate(username: TestCredentials.username, password: TestCredentials.password) { error in
             expectation.fulfill()
-            XCTAssertNil(error, "Failed authentication should not return an error")
+            XCTAssertNil(error, "Valid authentication should not return an error")
         }
         wait(for: [expectation], timeout: 10.0)
     }

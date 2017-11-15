@@ -4,7 +4,7 @@ import XCTest
 public class SlackBotTests: XCTestCase {
     func testIgnoresMessagesWithNoMentions() {
         let slackClient: DummySlackClient = DummySlackClient()
-        let bot: StandardSlackBot = StandardSlackBot(slackClient: slackClient)
+        let bot: StandardSlackBot = StandardSlackBot(slackClient: slackClient, sourcingClient: DummySourcingClient())
 
         bot.see(message: SlackMessageEvent(
             type: .message,
@@ -19,7 +19,7 @@ public class SlackBotTests: XCTestCase {
     
     func testMentionsTriggerSurprisedResponse() {
         let slackClient: DummySlackClient = DummySlackClient()
-        let bot: StandardSlackBot = StandardSlackBot(slackClient: slackClient)
+        let bot: StandardSlackBot = StandardSlackBot(slackClient: slackClient, sourcingClient: DummySourcingClient())
         bot.userId = "BOT_ID"
 
         bot.see(message: SlackMessageEvent(
@@ -37,12 +37,6 @@ public class SlackBotTests: XCTestCase {
     }
 
     func testAskingForTotalNumberOfActiveCases() {
-        class DummySourcingClient: SourcingClient {
-            func numberOfOpenCases(completion: @escaping (Int?, Error?) -> Void) {
-                completion(101, nil)
-            }
-        }
-
         let slackClient: DummySlackClient = DummySlackClient()
         let sourcingClient: DummySourcingClient = DummySourcingClient()
 
@@ -67,11 +61,21 @@ public class SlackBotTests: XCTestCase {
 class DummySlackClient: SlackClient {
     var postedMessages: [String] = []
 
+    func getUser(_ userId: String, completion: @escaping (SlackUser?, Error?) -> Void) {
+        XCTFail("This dummy client does not support getUser()")
+    }
+
     func rtmConnect(_ completionHandler: @escaping (SlackRTMConnectResponse) -> Void) {
         XCTFail("This dummy client does not support rtmConnect()")
     }
 
     func postMessage(_ text: String, to channel: String) {
         postedMessages.append("\(channel) \(text)")
+    }
+}
+
+class DummySourcingClient: SourcingClient {
+    func numberOfOpenCases(completion: @escaping (Int?, Error?) -> Void) {
+        completion(101, nil)
     }
 }

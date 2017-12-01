@@ -65,8 +65,8 @@ public class ProductionSourcingClient: SourcingClient {
             do {
                 let cases = try JSONDecoder().decode([SourcingCase].self, from: data)
                 completion(cases, nil)
-            } catch {
-                completion(nil, error)
+            } catch let e {
+                completion(nil, e)
             }
         }
         task.resume()

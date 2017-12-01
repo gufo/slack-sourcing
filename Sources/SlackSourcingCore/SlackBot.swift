@@ -64,7 +64,11 @@ public class StandardSlackBot: SlackBot {
                     return self.reportError(error, message: message)
                 }
 
-                self.slackClient.postMessage("<@\(message.user)> Du är aktuell hos \(self.join(clients)).", to: message.channel)
+                if clients.count > 0 {
+                    self.slackClient.postMessage("<@\(message.user)> Du är aktuell hos \(self.join(clients)).", to: message.channel)
+                } else {
+                    self.slackClient.postMessage("<@\(message.user)> Du är inte aktuell någonstans just nu. :broken_heart:", to: message.channel)
+                }
             }
         }
     }

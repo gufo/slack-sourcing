@@ -4,8 +4,8 @@ class SourcingCase: Decodable {
     var id: String
     var isArchived: Bool
     var customer: String
-    var suggestedConsultants: [String]
-    var proposedConsultants: [String]
+    var suggestedConsultants: [String]?
+    var proposedConsultants: [String]?
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
@@ -16,6 +16,7 @@ class SourcingCase: Decodable {
     }
 
     func containsConsultant(_ consultant: SourcingConsultant) -> Bool {
-        return suggestedConsultants.contains(consultant.id) || proposedConsultants.contains(consultant.id)
+        let allConsultants = (suggestedConsultants ?? []) + (proposedConsultants ?? [])
+        return allConsultants.contains(consultant.id)
     }
 }

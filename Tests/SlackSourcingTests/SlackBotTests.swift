@@ -51,9 +51,10 @@ public class SlackBotTests: XCTestCase {
         )
     }
 
-    func testAskingForMyOwnActiveCases() {
+    func testAskingForMyOwnActiveClients() {
         let slackClient = DummySlackClient()
         let sourcingClient = DummySourcingClient()
+        sourcingClient.prospectiveClients = ["Handelsbanken", "SVT", "TV4"]
 
         let bot = StandardSlackBot(slackClient: slackClient, sourcingClient: sourcingClient)
         bot.userId = "bot"
@@ -63,6 +64,22 @@ public class SlackBotTests: XCTestCase {
         XCTAssertEqual(
             slackClient.postedMessages,
             ["CHANNEL <@curious> Du är aktuell hos Handelsbanken, SVT och TV4."]
+        )
+    }
+
+    func testAskingForMyOwnActiveClientsWithDisappointingNews() {
+        let slackClient = DummySlackClient()
+        let sourcingClient = DummySourcingClient()
+        sourcingClient.prospectiveClients = []
+
+        let bot = StandardSlackBot(slackClient: slackClient, sourcingClient: sourcingClient)
+        bot.userId = "bot"
+
+        bot.see(message: askBot("vilka kunder finns jag på?"))
+
+        XCTAssertEqual(
+            slackClient.postedMessages,
+            ["CHANNEL <@curious> Du är inte aktuell någonstans just nu. :broken_heart:"]
         )
     }
 
@@ -95,8 +112,10 @@ class DummySlackClient: SlackClient {
 }
 
 class DummySourcingClient: SourcingClient {
+    var prospectiveClients: [String] = []
+
     func getProspectiveClientsForUser(_ email: String, completion: @escaping ([String]?, Error?) -> Void) {
-        completion(["Handelsbanken", "SVT", "TV4"], nil)
+        completion(prospectiveClients, nil)
     }
 
     func numberOfOpenCases(completion: @escaping (Int?, Error?) -> Void) {

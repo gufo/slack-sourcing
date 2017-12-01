@@ -25,6 +25,7 @@ public class StandardSlackBot: SlackBot {
         if message.mentions(self.userId) {
             switch (message.inferredCommand()) {
             case .getTotalCount: reportNumberOfOpenCases(message: message)
+            case .getMyProspectiveCustomers: reportMyProspectiveClients(message: message)
             case .whoami: reportMyEmailAddress(message: message)
             case .unknown:
                 slackClient.postMessage("<@\(message.user)> You talkin' to me? 'Cause I don't see nobody else here.", to: message.channel)
@@ -32,7 +33,7 @@ public class StandardSlackBot: SlackBot {
         }
     }
 
-    public func reportNumberOfOpenCases(message: SlackMessageEvent) {
+    func reportNumberOfOpenCases(message: SlackMessageEvent) {
         sourcingClient.numberOfOpenCases() { count, error in
             guard let count = count else {
                 return self.reportError(error, message: message)
@@ -42,7 +43,7 @@ public class StandardSlackBot: SlackBot {
         }
     }
 
-    public func reportMyEmailAddress(message: SlackMessageEvent) {
+    func reportMyEmailAddress(message: SlackMessageEvent) {
         slackClient.getUser(message.user) { user, error in
             guard let user = user else {
                 return self.reportError(error, message: message)
@@ -52,8 +53,33 @@ public class StandardSlackBot: SlackBot {
         }
     }
 
-    public func reportError(_ error: Error?, message: SlackMessageEvent) {
+    func reportMyProspectiveClients(message: SlackMessageEvent) {
+        slackClient.getUser(message.user) { user, error in
+            guard let user = user else {
+                return self.reportError(error, message: message)
+            }
+
+            self.sourcingClient.getProspectiveClientsForUser(user.email) { clients, error in
+                guard let clients = clients else {
+                    return self.reportError(error, message: message)
+                }
+
+                self.slackClient.postMessage("<@\(message.user)> Du är aktuell hos \(self.join(clients)).", to: message.channel)
+            }
+        }
+    }
+
+    func reportError(_ error: Error?, message: SlackMessageEvent) {
         let description = error?.localizedDescription ?? "Gah! Jag kraschade och vet inte varför."
         self.slackClient.postMessage("<@\(message.user)> :face_with_head_bandage: \(description)", to: message.channel)
+    }
+
+    private func join(_ strings: [String]) -> String {
+        if strings.count == 1 {
+            return strings.first!
+        } else {
+            let most = strings[0...strings.count - 2]
+            return most.joined(separator: ", ") + " och " + strings.last!
+        }
     }
 }

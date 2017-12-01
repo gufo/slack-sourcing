@@ -16,14 +16,26 @@ public class SlackMessageEventTests: XCTestCase {
     }
 
     func testInfersTotalCountCommands() {
-        let message = SlackMessageEvent(
+        let message = build(message: "Är det möcke nu?")
+        XCTAssertEqual(message.inferredCommand(), .getTotalCount)
+    }
+
+    func testInfersMyProspectiveClientsQuery() {
+        var message = build(message: "Vilka kunder är jag inspelad mot?")
+        XCTAssertEqual(message.inferredCommand(), .getMyProspectiveCustomers)
+
+        message = build(message: "Har jag några kunder?")
+        XCTAssertEqual(message.inferredCommand(), .getMyProspectiveCustomers)
+    }
+
+    private func build(message: String) -> SlackMessageEvent {
+        return SlackMessageEvent(
             type: .message,
             channel: "channel",
             user: "sender",
-            text: "Är det möcke nu?",
+            text: message,
             timestamp: ""
         )
 
-        XCTAssertEqual(message.inferredCommand(), .getTotalCount)
     }
 }

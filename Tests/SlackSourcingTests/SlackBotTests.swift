@@ -43,17 +43,36 @@ public class SlackBotTests: XCTestCase {
         let bot = StandardSlackBot(slackClient: slackClient, sourcingClient: sourcingClient)
         bot.userId = "bot"
         
-        bot.see(message: SlackMessageEvent(
-            type: .message,
-            channel: "CHANNEL",
-            user: "curious",
-            text: "<@bot> äre möcke nu?",
-            timestamp: ""
-        ))
+        bot.see(message: askBot("äre möcke nu?"))
 
         XCTAssertEqual(
             slackClient.postedMessages,
             ["CHANNEL <@curious> Vi har just nu 101 öppna ärenden."]
+        )
+    }
+
+    func testAskingForMyOwnActiveCases() {
+        let slackClient = DummySlackClient()
+        let sourcingClient = DummySourcingClient()
+
+        let bot = StandardSlackBot(slackClient: slackClient, sourcingClient: sourcingClient)
+        bot.userId = "bot"
+
+        bot.see(message: askBot("vilka kunder finns jag på?"))
+
+        XCTAssertEqual(
+            slackClient.postedMessages,
+            ["CHANNEL <@curious> Du är aktuell hos Handelsbanken, SVT och TV4."]
+        )
+    }
+
+    private func askBot(_ question: String) -> SlackMessageEvent {
+        return SlackMessageEvent(
+            type: .message,
+            channel: "CHANNEL",
+            user: "curious",
+            text: "<@bot> \(question)",
+            timestamp: ""
         )
     }
 }
@@ -62,7 +81,8 @@ class DummySlackClient: SlackClient {
     var postedMessages: [String] = []
 
     func getUser(_ userId: String, completion: @escaping (SlackUser?, Error?) -> Void) {
-        XCTFail("This dummy client does not support getUser()")
+        let dummyUser = SlackUser(id: "12345", email: "example@valtech.se")
+        completion(dummyUser, nil)
     }
 
     func rtmConnect(_ completionHandler: @escaping (SlackRTMConnectResponse) -> Void) {
@@ -75,6 +95,10 @@ class DummySlackClient: SlackClient {
 }
 
 class DummySourcingClient: SourcingClient {
+    func getProspectiveClientsForUser(_ email: String, completion: @escaping ([String]?, Error?) -> Void) {
+        completion(["Handelsbanken", "SVT", "TV4"], nil)
+    }
+
     func numberOfOpenCases(completion: @escaping (Int?, Error?) -> Void) {
         completion(101, nil)
     }

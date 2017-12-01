@@ -5,6 +5,7 @@ public typealias SourcingCallback<T> = (T?, Error?) -> Void
 
 public protocol SourcingClient {
     func numberOfOpenCases(completion: @escaping SourcingCallback<Int>)
+    func getProspectiveClientsForUser(_ email: String, completion: @escaping SourcingCallback<[String]>)
 }
 
 public class ProductionSourcingClient: SourcingClient {
@@ -29,12 +30,19 @@ public class ProductionSourcingClient: SourcingClient {
         }
     }
 
+    public func getProspectiveClientsForUser(_ email: String, completion: @escaping SourcingCallback<[String]>) {
+//        self.getAllCases { cases, error in
+//            let clients: Set<String> = cases?.map { $0.clientName }
+//        }
+    }
+
     func getAllCases(completion: @escaping SourcingCallback<[SourcingCase]>) {
         let request = oauthClient.urlRequest(url: baseURL.appendingPathComponent("api/case"), method: .get)
         let task = urlSession.dataTask(with: request) { data, response, error in
             guard let data = data else {
                 return completion(nil, error)
             }
+            print(String(data: data, encoding: .utf8)!)
 
             do {
                 let cases = try JSONDecoder().decode([SourcingCase].self, from: data)

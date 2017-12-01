@@ -11,6 +11,7 @@ public enum SlackParserError: Error {
 
 public enum SlackCommand {
     case getTotalCount
+    case getMyProspectiveCustomers
     case whoami
     case unknown
 }
@@ -53,6 +54,9 @@ public struct SlackMessageEvent: BasicSlackEvent, Equatable {
     public func inferredCommand() -> SlackCommand {
         if text.contains("möcke nu") {
             return .getTotalCount
+        }
+        if text.contains("jag") && text.contains("kunder") {
+            return .getMyProspectiveCustomers
         }
         if text.contains("whoami") {
             return .whoami
